@@ -1,36 +1,230 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LETEON 레테온 — C2C Bike Marketplace
 
-## Getting Started
+MTB · eMTB · eBike · Surron · Parts 전문 중고 자전거 C2C 플랫폼
 
-First, run the development server:
+---
+
+## 기술 스택
+
+| 영역 | 기술 |
+|------|------|
+| 프레임워크 | Next.js App Router (TypeScript) |
+| 스타일 | Tailwind CSS v4 |
+| 데이터베이스 | Supabase PostgreSQL |
+| 파일 저장 | Supabase Storage (`listing-images` 버킷) |
+| 인증 | Supabase Auth (이메일/비밀번호) |
+| 결제 | Toss Payments v2 (선택) |
+| 배포 | Vercel |
+
+---
+
+## 데이터가 유지되는 구조
+
+### 원칙
+
+사이트를 1000번 업데이트·재배포해도 사용자가 등록한 **매물, 회원정보, 이미지, 결제내역**은 절대 삭제되지 않습니다.
+
+```
+[사용자 브라우저]
+       │
+       ▼
+[Next.js / Vercel]  ──── 재배포해도 이 레이어만 바뀜
+       │
+       ▼
+[Supabase PostgreSQL]  ← 영구 데이터 저장소 (재배포와 무관)
+[Supabase Storage]     ← 이미지 영구 저장소 (재배포와 무관)
+```
+
+Vercel 재배포는 **코드(Next.js 앱)**만 교체합니다.
+Supabase는 독립 인프라이므로 Vercel 배포와 완전히 분리되어 있습니다.
+
+### 저장 위치
+
+| 데이터 | 저장 위치 |
+|--------|----------|
+| 회원 정보 | `public.profiles` 테이블 |
+| 판매 매물 | `public.listings` 테이블 |
+| 매물 이미지 | Supabase Storage `listing-images` 버킷 (URL만 DB 저장) |
+| 찜(하트) | `public.hearts` 테이블 |
+| 결제 내역 | `public.payments` 테이블 |
+| 신고 | `public.reports` 테이블 |
+| 관리자 로그 | `public.admin_logs` 테이블 |
+
+### 절대 하지 않는 것
+
+```sql
+-- 금지
+DROP TABLE listings;
+TRUNCATE listings;
+DELETE FROM listings WHERE ...;
+
+-- 허용 (데이터 유지하며 구조 변경)
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS brand text DEFAULT '';
+CREATE TABLE IF NOT EXISTS new_feature (...);
+UPDATE listings SET status = 'deleted' WHERE id = '...';  -- 소프트 삭제만
+```
+
+---
+
+## DB 초기 설정 (새 프로젝트)
+
+Supabase 대시보드 → SQL Editor에서 전체 실행:
+
+```
+supabase/schema.sql
+```
+
+이미 DB가 설정된 경우 새 마이그레이션만 실행:
+
+```
+supabase/migrations/002_add_listing_metadata.sql
+```
+
+---
+
+## Migration 가이드
+
+기능이 추가될 때마다 `supabase/migrations/` 에 순서대로 파일을 만듭니다.
+
+```
+supabase/
+  schema.sql                        ← 마스터 스키마 (전체 재현용, 항상 안전)
+  seed.sql                          ← 개발용 예제 데이터 (운영 실행 금지)
+  migrations/
+    001_initial_schema.sql          ← 기록용 (이미 적용됨)
+    002_add_listing_metadata.sql    ← brand, model, year, reports, admin_logs
+    003_xxx.sql                     ← 다음 기능 추가 시
+```
+
+### 새 컬럼 추가 예시
+
+```sql
+-- migrations/003_add_view_count.sql
+ALTER TABLE public.listings ADD COLUMN IF NOT EXISTS view_count integer NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_listings_view_count ON public.listings (view_count DESC);
+```
+
+### 새 테이블 추가 예시
+
+```sql
+-- migrations/004_add_chat.sql
+CREATE TABLE IF NOT EXISTS public.chats (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id uuid REFERENCES public.listings(id) ON DELETE SET NULL,
+  buyer_id   uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  seller_id  uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+---
+
+## 이미지 저장 구조
+
+이미지는 Supabase Storage에 직접 업로드되고, DB에는 Public URL만 저장됩니다.
+
+```
+업로드 흐름:
+  1. 사용자가 사진 선택 (최대 5개, 각 10MB 이하)
+  2. 브라우저 → Supabase Storage 직접 업로드
+     버킷: listing-images (public)
+     경로: {timestamp}-{random}.{ext}
+  3. Public URL 반환
+  4. listings.image_urls 배열에 URL 저장
+  5. listings.thumbnail = image_urls[0]
+
+삭제 방지:
+  - Storage 객체는 사용자가 명시적으로 삭제하지 않는 한 영구 보존
+  - 매물 삭제 시 DB 레코드의 status = 'deleted' 처리만
+  - 이미지 파일 자체는 삭제하지 않음
+```
+
+---
+
+## 업데이트 시 주의사항
+
+### 해도 되는 것
+
+- `git push` / Vercel Deploy — 코드만 배포, 데이터 영향 없음
+- `supabase/schema.sql` 실행 — `IF NOT EXISTS` 사용이므로 재실행 안전
+- 새 `migrations/00N_xxx.sql` Supabase SQL Editor에서 실행
+
+### 절대 하지 말 것
+
+```
+❌  Supabase 대시보드에서 테이블 DROP
+❌  TRUNCATE 실행
+❌  운영 DB에서 seed.sql 실행
+❌  .env.local 의 NEXT_PUBLIC_SUPABASE_URL 을 다른 프로젝트로 변경
+❌  대량 DELETE 쿼리 실행
+❌  Storage 버킷 전체 삭제
+```
+
+### 코드 변경 시 체크리스트
+
+- [ ] 새 DB 컬럼이 필요하면 `ALTER TABLE ADD COLUMN IF NOT EXISTS` 마이그레이션 파일 작성
+- [ ] 마이그레이션 파일을 **먼저 Supabase에서 실행**한 뒤 코드 배포
+- [ ] 기존 컬럼 타입 변경 시 데이터 유실 여부 반드시 확인
+- [ ] `types/index.ts` TypeScript 타입도 함께 업데이트
+
+---
+
+## 시작하기
+
+### 1. 패키지 설치
+
+```bash
+npm install
+```
+
+### 2. 환경변수 설정
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://qzujzsgjsiqhornsxvhv.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...        # 서버 전용, 클라이언트 노출 금지
+NEXT_PUBLIC_TOSS_CLIENT_KEY=...      # 선택 (없으면 결제 없이 바로 등록)
+TOSS_SECRET_KEY=...                  # 선택
+```
+
+### 3. Supabase DB 스키마 적용
+
+Supabase 대시보드 → **SQL Editor** 에서 `supabase/schema.sql` 전체 실행
+
+### 4. 개발 서버 실행
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 인증 설정
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Supabase Authentication
 
-## Learn More
+1. **Authentication → URL Configuration → Redirect URLs** 에 추가:
 
-To learn more about Next.js, take a look at the following resources:
+```
+http://localhost:3000/auth/callback
+https://your-domain.vercel.app/auth/callback
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. (선택) 이메일 인증 없이 즉시 로그인 허용: **Authentication → Settings → Enable email confirmations** 비활성화
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 관리자
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 계정: `leteon2026@gmail.com` 만 `/admin` 접근 가능
+- 매물 삭제 = `status = 'deleted'` 소프트 삭제 (DB 행 삭제 아님)
+- 대량 삭제 기능 없음 — 개별 확인 후 처리
+- 모든 관리 행동은 `admin_logs` 테이블에 기록
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Vercel 배포
+
+1. Vercel → Settings → Environment Variables 에 `.env.local` 내용 입력
+2. Supabase Site URL 을 Vercel 도메인으로 변경
+3. Supabase URL Configuration → Site URL 을 Vercel 도메인으로 변경
