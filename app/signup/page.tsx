@@ -331,9 +331,9 @@ export default function SignupPage() {
                 </div>
                 <span className="text-xs text-zinc-400 leading-relaxed">
                   레테온의{' '}
-                  <span className="text-lime-400 underline underline-offset-2">이용약관</span>
+                  <Link href="/terms" target="_blank" className="text-lime-400 underline underline-offset-2 hover:text-lime-300">이용약관</Link>
                   {' '}및{' '}
-                  <span className="text-lime-400 underline underline-offset-2">개인정보처리방침</span>
+                  <Link href="/privacy" target="_blank" className="text-lime-400 underline underline-offset-2 hover:text-lime-300">개인정보처리방침</Link>
                   에 동의합니다.
                 </span>
               </label>

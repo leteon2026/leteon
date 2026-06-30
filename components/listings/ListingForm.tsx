@@ -153,9 +153,7 @@ export default function ListingForm() {
                 <input type="number" name="price" value={form.price} onChange={handleChange} required min={1}
                   placeholder="2500000"
                   className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500" />
-                {fee > 0 && (
-                  <p className="mt-1 text-xs text-zinc-500">등록비: <span className="text-lime-400 font-semibold">{formatPrice(fee)}</span> (가격의 1%)</p>
-                )}
+                <p className="mt-1 text-xs text-lime-400/70">현재 무료로 등록할 수 있습니다.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">거래 지역</label>
@@ -220,8 +218,10 @@ export default function ListingForm() {
               {form.location && <div className="flex justify-between"><dt className="text-zinc-500">지역</dt><dd className="text-white">{form.location}</dd></div>}
             </dl>
             <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-between items-center">
-              <span className="text-sm text-zinc-400">등록비 (가격의 1%)</span>
-              <span className="text-lg font-black text-lime-400">{formatPrice(fee)}</span>
+              <span className="text-sm text-zinc-400">등록비</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-lime-400/10 border border-lime-400/30 rounded text-lime-400 text-sm font-bold">
+                무료
+              </span>
             </div>
             <p className="mt-2 text-xs text-zinc-600">등록 후 30일이 지난 뒤 삭제할 수 있습니다.</p>
           </div>
@@ -229,11 +229,7 @@ export default function ListingForm() {
           <div className="flex gap-3">
             <Button type="button" variant="outline" size="lg" onClick={() => setStep('form')}>수정</Button>
             <Button type="submit" variant="primary" size="lg" disabled={loading} className="flex-1">
-              {loading
-                ? '처리 중...'
-                : process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY
-                  ? `${formatPrice(fee)} 결제하고 등록`
-                  : '매물 등록하기'}
+              {loading ? '처리 중...' : '무료로 등록하기'}
             </Button>
           </div>
         </div>
