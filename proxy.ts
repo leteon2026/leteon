@@ -42,10 +42,11 @@ export async function proxy(request: NextRequest) {
     if (!isAdmin(user.email)) return redirect('/?error=forbidden')
   }
 
-  if (['/my', '/listings/new'].some(p => pathname.startsWith(p)) && !user) {
+  if (['/my', '/listings/new', '/account'].some(p => pathname.startsWith(p)) && !user) {
     return redirect(`/login?next=${encodeURIComponent(pathname)}`)
   }
 
+  // 이미 로그인된 상태에서 /login, /signup 접근 시 홈으로 이동
   if ((pathname === '/login' || pathname === '/signup') && user) {
     return redirect('/')
   }

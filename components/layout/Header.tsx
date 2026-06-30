@@ -7,11 +7,10 @@ import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
 const categories = [
-  { label: 'MTB',    href: '/listings?category=MTB' },
-  { label: 'eMTB',   href: '/listings?category=eMTB' },
-  { label: 'eBike',  href: '/listings?category=eBike' },
-  { label: 'Surron', href: '/listings?category=Surron' },
-  { label: 'Parts',  href: '/listings?category=Parts' },
+  { label: 'MTB',   href: '/listings?category=MTB' },
+  { label: 'eMTB',  href: '/listings?category=eMTB' },
+  { label: 'eBike', href: '/listings?category=eBike' },
+  { label: 'Parts', href: '/listings?category=Parts' },
 ]
 
 export default function Header() {
@@ -59,7 +58,7 @@ export default function Header() {
   return (
     <>
       {/* 헤더 바 */}
-      <header className="sticky top-0 z-40 bg-black/95 backdrop-blur border-b border-zinc-800">
+      <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-2xl border-b border-white/[0.06] shadow-lg shadow-black/20">
         <div className="flex items-center justify-between h-14 px-4 max-w-screen-xl mx-auto">
 
           {/* 로고 */}
@@ -87,7 +86,7 @@ export default function Header() {
                   + 매물 등록
                 </Link>
                 <Link href="/my" className="flex items-center gap-2 group">
-                  <div className="w-8 h-8 rounded-full bg-zinc-700 overflow-hidden border border-zinc-700 flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 overflow-hidden border border-white/10 flex-shrink-0">
                     {profile?.avatar_url ? (
                       <Image src={profile.avatar_url} alt={displayName} width={32} height={32} className="object-cover w-full h-full" />
                     ) : (
@@ -100,26 +99,28 @@ export default function Header() {
                     {displayName}
                   </span>
                 </Link>
+                <Link href="/account"
+                  className="text-xs text-zinc-600 hover:text-zinc-300 transition-colors px-2 py-1">
+                  계정
+                </Link>
                 <button onClick={handleLogout}
                   className="text-xs text-zinc-600 hover:text-red-400 transition-colors px-2 py-1">
                   로그아웃
                 </button>
               </>
             ) : (
-              <Link href="/login"
-                className="text-sm text-zinc-400 hover:text-lime-400 transition-colors font-medium">
-                로그인
-              </Link>
+              <>
+                <Link href="/signup"
+                  className="text-sm text-zinc-400 hover:text-lime-400 transition-colors font-medium border border-white/10 hover:border-lime-400/40 px-3.5 py-2 rounded">
+                  회원가입
+                </Link>
+                <Link href="/login"
+                  className="text-sm text-black font-bold bg-lime-400 hover:bg-lime-300 transition-colors px-3.5 py-2 rounded">
+                  로그인
+                </Link>
+              </>
             )}
           </div>
-
-          {/* 모바일: 로그인 전 로그인 버튼 */}
-          {!user && (
-            <Link href="/login"
-              className="md:hidden text-sm text-zinc-400 hover:text-lime-400 transition-colors font-medium mr-2">
-              로그인
-            </Link>
-          )}
 
           {/* 햄버거 버튼 */}
           <button
@@ -141,10 +142,10 @@ export default function Header() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeDrawer} aria-hidden="true" />
 
           {/* 드로어 패널 */}
-          <div className="absolute top-0 right-0 bottom-0 w-72 bg-zinc-950 border-l border-zinc-800 flex flex-col shadow-2xl">
+          <div className="absolute top-0 right-0 bottom-0 w-72 glass-card-strong border-l border-white/[0.08] flex flex-col shadow-2xl shadow-black/60">
 
             {/* 드로어 헤더 */}
-            <div className="flex items-center justify-between px-5 h-14 border-b border-zinc-800 shrink-0">
+            <div className="flex items-center justify-between px-5 h-14 border-b border-white/[0.06] shrink-0">
               <span className="text-base font-black text-lime-400 tracking-widest">LETEON</span>
               <button
                 onClick={closeDrawer}
@@ -159,9 +160,9 @@ export default function Header() {
 
             {/* 로그인 유저 정보 */}
             {user && (
-              <div className="px-5 py-4 border-b border-zinc-800 shrink-0">
+              <div className="px-5 py-4 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden border border-zinc-700 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden border border-white/10 flex-shrink-0">
                     {profile?.avatar_url ? (
                       <Image src={profile.avatar_url} alt={displayName} width={40} height={40} className="object-cover w-full h-full" />
                     ) : (
@@ -191,7 +192,7 @@ export default function Header() {
               ))}
 
               {/* 전체 매물 */}
-              <div className="mt-4 pt-4 border-t border-zinc-800/60">
+              <div className="mt-4 pt-4 border-t border-white/5">
                 <Link href="/listings" onClick={closeDrawer}
                   className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded transition-colors">
                   전체 매물
@@ -200,17 +201,21 @@ export default function Header() {
 
               {/* 내 계정 */}
               {user && (
-                <div className="mt-4 pt-4 border-t border-zinc-800/60">
+                <div className="mt-4 pt-4 border-t border-white/5">
                   <Link href="/my" onClick={closeDrawer}
                     className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded transition-colors">
                     내 매물 / 프로필
+                  </Link>
+                  <Link href="/account" onClick={closeDrawer}
+                    className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded transition-colors">
+                    계정 설정
                   </Link>
                 </div>
               )}
             </nav>
 
             {/* 하단 액션 */}
-            <div className="shrink-0 px-3 pb-8 pt-3 border-t border-zinc-800 space-y-2">
+            <div className="shrink-0 px-3 pb-8 pt-3 border-t border-white/[0.06] space-y-2">
               {user ? (
                 <>
                   <Link href="/listings/new" onClick={closeDrawer}
@@ -226,10 +231,16 @@ export default function Header() {
                   </button>
                 </>
               ) : (
-                <Link href="/login" onClick={closeDrawer}
-                  className="block w-full text-center bg-lime-400 text-black text-sm font-bold py-3 rounded hover:bg-lime-300 transition-colors">
-                  로그인
-                </Link>
+                <>
+                  <Link href="/login" onClick={closeDrawer}
+                    className="block w-full text-center bg-lime-400 text-black text-sm font-bold py-3 rounded hover:bg-lime-300 transition-colors">
+                    로그인
+                  </Link>
+                  <Link href="/signup" onClick={closeDrawer}
+                    className="block w-full text-center border border-white/10 text-zinc-300 hover:text-white text-sm font-medium py-3 rounded hover:border-white/20 transition-colors">
+                    회원가입
+                  </Link>
+                </>
               )}
             </div>
           </div>

@@ -1,3 +1,4 @@
+// Surron은 DB CHECK 제약에 남아있어 기존 데이터 호환 유지 (UI에서는 제외)
 export type Category = 'MTB' | 'eMTB' | 'eBike' | 'Surron' | 'Parts'
 
 export type ListingStatus = 'draft' | 'active' | 'sold' | 'deleted'
@@ -12,8 +13,13 @@ export interface Profile {
   avatar_url: string
   bio: string
   phone: string
+  email: string
+  verified_phone: boolean
+  role: string
   heart_count: number
   created_at: string
+  updated_at: string
+  deleted_at: string | null
 }
 
 export interface Listing {
@@ -65,4 +71,5 @@ export const CONDITION_LABEL: Record<ListingCondition, string> = {
   fair: '보통',
 }
 
-export const CATEGORY_LIST: Category[] = ['MTB', 'eMTB', 'eBike', 'Surron', 'Parts']
+// Surron은 표시하지 않음 (카테고리 4개로 고정)
+export const CATEGORY_LIST: Category[] = ['MTB', 'eMTB', 'eBike', 'Parts']

@@ -43,7 +43,7 @@ export default async function MyPage() {
       <h1 className="text-3xl font-black text-white mb-8">내 계정</h1>
 
       {/* Profile Section */}
-      <div className="bg-zinc-900 border border-zinc-700 rounded p-6 mb-8">
+      <div className="glass-card rounded p-6 mb-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative w-16 h-16 rounded-full bg-zinc-800 overflow-hidden border border-zinc-700 flex-shrink-0">
             {profile?.avatar_url ? (
@@ -81,7 +81,7 @@ export default async function MyPage() {
         ) : (
           <div className="space-y-3">
             {(listings as Listing[]).map(listing => (
-              <div key={listing.id} className="bg-zinc-900 border border-zinc-700 rounded p-4 flex items-center gap-4">
+              <div key={listing.id} className="glass-card rounded p-4 flex items-center gap-4 hover:border-white/15 transition-colors duration-200">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-sm font-semibold ${statusColor[listing.status]}`}>

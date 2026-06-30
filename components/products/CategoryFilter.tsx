@@ -7,7 +7,6 @@ const categories = [
   { value: 'MTB', label: 'MTB' },
   { value: 'eMTB', label: 'eMTB' },
   { value: 'eBike', label: 'eBike' },
-  { value: 'Surron', label: 'Surron' },
   { value: 'Parts', label: 'Parts' },
 ]
 

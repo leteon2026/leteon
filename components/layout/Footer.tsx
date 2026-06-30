@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-zinc-950 border-t border-zinc-800">
+    <footer className="bg-black/60 backdrop-blur-xl border-t border-white/[0.06]">
       <div className="max-w-screen-xl mx-auto px-4 py-10">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
           {/* 브랜드 */}
@@ -20,7 +20,7 @@ export default function Footer() {
             <div>
               <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">카테고리</p>
               <ul className="space-y-2">
-                {['MTB', 'eMTB', 'eBike', 'Surron', 'Parts'].map(cat => (
+                {['MTB', 'eMTB', 'eBike', 'Parts'].map(cat => (
                   <li key={cat}>
                     <Link href={`/listings?category=${cat}`}
                       className="text-sm text-zinc-400 hover:text-lime-400 transition-colors">
@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-zinc-800">
+        <div className="mt-10 pt-6 border-t border-white/[0.06]">
           <p className="text-sm text-zinc-500">&copy; {new Date().getFullYear()} LETEON 레테온. All rights reserved.</p>
         </div>
       </div>

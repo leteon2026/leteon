@@ -71,7 +71,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
       {/* 판매자 소개 */}
       {seller && (
-        <div className="bg-zinc-900 border border-zinc-700 rounded p-5 mb-8">
+        <div className="glass-card rounded p-5 mb-8">
           <p className="text-xs font-semibold text-zinc-500 tracking-widest uppercase mb-4">판매자 소개</p>
 
           <div className="flex items-start justify-between gap-4">
@@ -107,7 +107,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* 전화번호 + 거래 지역 */}
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {sellerPhone && (
-              <div className="flex items-center gap-3 bg-zinc-800 rounded px-4 py-3">
+              <div className="flex items-center gap-3 glass-input rounded px-4 py-3">
                 <svg className="w-4 h-4 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
@@ -118,7 +118,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
             {listing.location && (
-              <div className="flex items-center gap-3 bg-zinc-800 rounded px-4 py-3">
+              <div className="flex items-center gap-3 glass-input rounded px-4 py-3">
                 <svg className="w-4 h-4 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -133,7 +133,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
           {/* 판매자 소개글 */}
           {seller.bio && (
-            <p className="mt-4 text-sm text-zinc-400 leading-relaxed border-t border-zinc-800 pt-4">
+            <p className="mt-4 text-sm text-zinc-400 leading-relaxed border-t border-white/[0.06] pt-4">
               {seller.bio}
             </p>
           )}
@@ -143,7 +143,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       {/* 사진 */}
       {listing.image_urls && listing.image_urls.length > 0 ? (
         <div className="mb-8 space-y-3">
-          <div className="relative aspect-video sm:aspect-square bg-zinc-900 rounded overflow-hidden border border-zinc-700">
+          <div className="relative aspect-video sm:aspect-square bg-zinc-900 rounded overflow-hidden border border-white/10">
             <Image
               src={listing.image_urls[0]}
               alt={listing.title}
@@ -161,7 +161,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {listing.image_urls.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {listing.image_urls.slice(1, 5).map((url: string, i: number) => (
-                <div key={i} className="relative aspect-square bg-zinc-900 rounded overflow-hidden border border-zinc-700">
+                <div key={i} className="relative aspect-square bg-zinc-900 rounded overflow-hidden border border-white/10">
                   <Image src={url} alt={`${listing.title} ${i + 2}`} fill className="object-cover" sizes="25vw" />
                 </div>
               ))}
@@ -169,7 +169,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           )}
         </div>
       ) : (
-        <div className="aspect-video bg-zinc-900 rounded border border-zinc-700 flex items-center justify-center mb-8">
+        <div className="aspect-video bg-zinc-900 rounded border border-white/10 flex items-center justify-center mb-8">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -177,7 +177,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       )}
 
       {/* 상품 설명 */}
-      <div className="bg-zinc-900 border border-zinc-700 rounded p-5 mb-6">
+      <div className="glass-card rounded p-5 mb-6">
         <h2 className="text-xs font-semibold text-zinc-500 tracking-widest uppercase mb-4">상품 설명</h2>
         {listing.description ? (
           <p className="text-sm text-zinc-200 leading-relaxed whitespace-pre-line">{listing.description}</p>
@@ -188,7 +188,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
       {/* 스펙 */}
       {listing.specs && Object.keys(listing.specs).length > 0 && (
-        <div className="bg-zinc-900 border border-zinc-700 rounded p-5 mb-6">
+        <div className="glass-card rounded p-5 mb-6">
           <h2 className="text-xs font-semibold text-zinc-500 tracking-widest uppercase mb-4">스펙</h2>
           <dl className="space-y-2">
             {Object.entries(listing.specs).map(([key, value]) => (

@@ -25,15 +25,13 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') ?? '/'
-  const errorParam = searchParams.get('error')
+  const message = searchParams.get('message')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(
-    errorParam ? decodeURIComponent(errorParam) : null
-  )
+  const [error, setError] = useState<string | null>(null)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,32 +39,55 @@ export default function LoginPage() {
     setError(null)
 
     const supabase = createClient()
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (authError) {
-      setError(
-        authError.message === 'Invalid login credentials'
-          ? '이메일 또는 비밀번호가 올바르지 않습니다.'
-          : authError.message
-      )
+      setError('이메일 또는 비밀번호를 확인해주세요.')
       setLoading(false)
       return
     }
 
+    // 탈퇴된 계정 차단
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('deleted_at')
+        .eq('id', data.user.id)
+        .maybeSingle()
+
+      if (profile?.deleted_at) {
+        await supabase.auth.signOut()
+        setError('탈퇴된 계정입니다. 문의가 필요하시면 고객센터로 연락해주세요.')
+        setLoading(false)
+        return
+      }
+    }
+
     router.replace(next)
+    router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
+        {/* 로고 */}
         <div className="text-center mb-8">
-          <p className="text-3xl font-black text-lime-400 tracking-widest">LETEON</p>
-          <p className="mt-1 text-zinc-400 text-sm font-medium">레테온</p>
+          <Link href="/" className="inline-block">
+            <p className="text-3xl font-black text-lime-400 tracking-widest">LETEON</p>
+            <p className="mt-0.5 text-zinc-500 text-xs font-medium tracking-widest uppercase">Korea Bike Marketplace</p>
+          </Link>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-700 rounded p-7">
+        <div className="glass-card-strong rounded p-7 shadow-2xl shadow-black/50">
           <h1 className="text-base font-bold text-white mb-1 text-center">로그인</h1>
-          <p className="text-zinc-400 text-sm text-center mb-6">이메일과 비밀번호를 입력하세요</p>
+          <p className="text-zinc-500 text-sm text-center mb-6">이메일과 비밀번호를 입력하세요</p>
+
+          {/* 가입 완료 안내 (자동로그인 실패 시) */}
+          {message && !error && (
+            <div className="mb-5 p-3 bg-lime-400/10 border border-lime-400/30 rounded text-sm text-lime-400 text-center">
+              {message}
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-400 text-center">
@@ -76,7 +97,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">이메일</label>
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+                이메일
+              </label>
               <input
                 type="email"
                 value={email}
@@ -84,12 +107,14 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 placeholder="example@email.com"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">비밀번호</label>
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+                비밀번호
+              </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -98,12 +123,13 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                  className="w-full glass-input rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  tabIndex={-1}
                 >
                   <EyeIcon open={showPassword} />
                 </button>
@@ -113,9 +139,19 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded transition-colors text-sm mt-2"
+              className="w-full bg-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded transition-colors text-sm mt-2"
             >
-              {loading ? '로그인 중...' : '로그인'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  로그인 중...
+                </span>
+              ) : (
+                '로그인'
+              )}
             </button>
           </form>
 

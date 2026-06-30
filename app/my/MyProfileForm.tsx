@@ -78,7 +78,7 @@ export default function MyProfileForm({ profile, userId }: { profile: Profile | 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-400">
+        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded text-sm text-red-400 backdrop-blur-sm">
           {error}
         </div>
       )}
@@ -141,7 +141,7 @@ export default function MyProfileForm({ profile, userId }: { profile: Profile | 
           onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
           maxLength={20}
           placeholder="닉네임 입력"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+          className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500"
         />
         <p className="mt-1 text-xs text-zinc-600">2~20자. 다른 유저에게 표시되는 이름입니다.</p>
       </div>
@@ -160,7 +160,7 @@ export default function MyProfileForm({ profile, userId }: { profile: Profile | 
           rows={3}
           maxLength={160}
           placeholder="자신을 소개해보세요 — 어떤 바이크를 타는지, 어디서 라이딩하는지 등"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400 resize-none"
+          className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 resize-none"
         />
       </div>
 
@@ -172,7 +172,7 @@ export default function MyProfileForm({ profile, userId }: { profile: Profile | 
           value={form.phone}
           onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
           placeholder="010-0000-0000"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+          className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500"
         />
         <p className="mt-1 text-xs text-zinc-600">매물 상세 페이지에서 잠재 구매자에게 표시됩니다.</p>
       </div>

@@ -113,7 +113,7 @@ export default function ListingForm() {
             </div>
           )}
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded p-6 space-y-5">
+          <div className="glass-card rounded p-6 space-y-5">
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-zinc-300 mb-1.5">
@@ -121,7 +121,7 @@ export default function ListingForm() {
               </label>
               <input name="title" value={form.title} onChange={handleChange} required
                 placeholder="예: Trek Fuel EX 9.8 2024 판매합니다"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400" />
+                className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500" />
             </div>
 
             {/* Category & Condition */}
@@ -129,14 +129,14 @@ export default function ListingForm() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">카테고리</label>
                 <select name="category" value={form.category} onChange={handleChange}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white focus:outline-none focus:border-lime-400">
+                  className="w-full glass-input rounded px-4 py-2.5 text-sm text-white">
                   {CATEGORY_LIST.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">상태</label>
                 <select name="condition" value={form.condition} onChange={handleChange}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white focus:outline-none focus:border-lime-400">
+                  className="w-full glass-input rounded px-4 py-2.5 text-sm text-white">
                   {(Object.entries(CONDITION_LABEL) as [ListingCondition, string][]).map(([v, l]) => (
                     <option key={v} value={v}>{l}</option>
                   ))}
@@ -152,7 +152,7 @@ export default function ListingForm() {
                 </label>
                 <input type="number" name="price" value={form.price} onChange={handleChange} required min={1}
                   placeholder="2500000"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400" />
+                  className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500" />
                 {fee > 0 && (
                   <p className="mt-1 text-xs text-zinc-500">등록비: <span className="text-lime-400 font-semibold">{formatPrice(fee)}</span> (가격의 1%)</p>
                 )}
@@ -161,7 +161,7 @@ export default function ListingForm() {
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">거래 지역</label>
                 <input name="location" value={form.location} onChange={handleChange}
                   placeholder="예: 서울 강남구"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400" />
+                  className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500" />
               </div>
             </div>
 
@@ -170,7 +170,7 @@ export default function ListingForm() {
               <label className="block text-sm font-medium text-zinc-300 mb-1.5">상품 설명</label>
               <textarea name="description" value={form.description} onChange={handleChange} rows={5}
                 placeholder="상품 상태, 구매 시기, 사용 기간, 특이사항 등을 자세히 적어주세요"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400 resize-none" />
+                className="w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 resize-none" />
             </div>
 
             {/* 이미지 업로드 */}
@@ -192,9 +192,9 @@ export default function ListingForm() {
                 {specs.map((s, i) => (
                   <div key={i} className="flex gap-2">
                     <input value={s.key} onChange={e => updateSpec(i, 'key', e.target.value)} placeholder="항목 (예: 프레임 사이즈)"
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400" />
+                      className="flex-1 glass-input rounded px-3 py-2 text-sm text-white placeholder-zinc-500" />
                     <input value={s.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="값 (예: M)"
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400" />
+                      className="flex-1 glass-input rounded px-3 py-2 text-sm text-white placeholder-zinc-500" />
                     <button type="button" onClick={() => removeSpec(i)} className="px-2 text-zinc-600 hover:text-red-400">✕</button>
                   </div>
                 ))}
@@ -210,7 +210,7 @@ export default function ListingForm() {
 
       {step === 'preview' && (
         <div className="space-y-6">
-          <div className="bg-zinc-900 border border-lime-400/40 rounded p-6">
+          <div className="glass-card rounded p-6 border-lime-400/20">
             <h2 className="text-sm font-semibold text-lime-400 mb-4 tracking-wider uppercase">등록 확인</h2>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between"><dt className="text-zinc-500">제목</dt><dd className="text-white font-medium">{form.title}</dd></div>

@@ -1,6 +1,6 @@
 # LETEON 레테온 — C2C Bike Marketplace
 
-MTB · eMTB · eBike · Surron · Parts 전문 중고 자전거 C2C 플랫폼
+MTB · eMTB · eBike · Parts 전문 중고 자전거 C2C 플랫폼
 
 ---
 
@@ -93,7 +93,8 @@ supabase/
   migrations/
     001_initial_schema.sql          ← 기록용 (이미 적용됨)
     002_add_listing_metadata.sql    ← brand, model, year, reports, admin_logs
-    003_xxx.sql                     ← 다음 기능 추가 시
+    003_add_phone.sql               ← profiles.phone 컬럼
+    004_update_profiles_auth.sql    ← email, verified_phone, role, deleted_at, updated_at, username UNIQUE
 ```
 
 ### 새 컬럼 추가 예시
@@ -107,7 +108,7 @@ CREATE INDEX IF NOT EXISTS idx_listings_view_count ON public.listings (view_coun
 ### 새 테이블 추가 예시
 
 ```sql
--- migrations/004_add_chat.sql
+-- migrations/005_add_chat.sql
 CREATE TABLE IF NOT EXISTS public.chats (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   listing_id uuid REFERENCES public.listings(id) ON DELETE SET NULL,
@@ -181,11 +182,14 @@ npm install
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://qzujzsgjsiqhornsxvhv.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...        # 서버 전용, 클라이언트 노출 금지
-NEXT_PUBLIC_TOSS_CLIENT_KEY=...      # 선택 (없으면 결제 없이 바로 등록)
-TOSS_SECRET_KEY=...                  # 선택
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...        # 브라우저 노출 가능 (anon key)
+SUPABASE_SERVICE_ROLE_KEY=...            # 서버 전용 — 절대 NEXT_PUBLIC_ 접두사 금지
+NEXT_PUBLIC_TOSS_CLIENT_KEY=...          # 선택 (없으면 결제 없이 바로 등록)
+TOSS_SECRET_KEY=...                      # 선택
 ```
+
+> **Vercel 배포 시**: Settings → Environment Variables 에서 동일하게 입력.  
+> `SUPABASE_SERVICE_ROLE_KEY`는 Production/Preview 환경에서도 반드시 서버 전용으로 유지.
 
 ### 3. Supabase DB 스키마 적용
 
@@ -203,14 +207,52 @@ npm run dev
 
 ### Supabase Authentication
 
-1. **Authentication → URL Configuration → Redirect URLs** 에 추가:
+#### 1. 이메일 확인 비활성화 (MVP 필수)
+
+Supabase 대시보드 → **Authentication → Configuration → Email** 에서:
+- **"Confirm email"** 옵션을 **OFF** 로 설정
+
+> 이 설정이 꺼져 있어야 가입 즉시 로그인이 가능합니다.
+> MVP 이후 이메일 인증을 켜려면 별도 UI(인증 메일 재발송, 확인 페이지)가 필요합니다.
+
+#### 2. Redirect URLs 등록
+
+**Authentication → URL Configuration → Redirect URLs** 에 추가:
 
 ```
 http://localhost:3000/auth/callback
 https://your-domain.vercel.app/auth/callback
 ```
 
-2. (선택) 이메일 인증 없이 즉시 로그인 허용: **Authentication → Settings → Enable email confirmations** 비활성화
+#### 3. 가입 API 보안 구조
+
+```
+클라이언트 (브라우저)
+  └─ POST /api/auth/signup      ← SUPABASE_SERVICE_ROLE_KEY 사용 (서버 전용)
+       └─ admin.auth.admin.createUser(email_confirm: true)
+       └─ profiles 테이블 upsert
+
+클라이언트에서 직접 supabase.auth.signUp() 호출하지 않음
+NEXT_PUBLIC_ 접두사 없는 서비스 키는 절대 브라우저에 노출되지 않음
+```
+
+#### 4. 전화번호 인증 (MVP 미적용)
+
+현재 전화번호는 수집만 하고 SMS 인증은 없습니다 (`verified_phone = false`).
+가입 화면에 "현재는 전화번호 인증 없이 가입됩니다." 안내가 표시됩니다.
+
+#### 5. DB 마이그레이션 실행 순서
+
+새 DB라면 `schema.sql` 실행 후:
+```
+supabase/migrations/004_update_profiles_auth.sql
+```
+
+기존 DB라면 `004_update_profiles_auth.sql` 만 실행 (멱등성 보장):
+- profiles 테이블에 email, verified_phone, role, deleted_at, updated_at 컬럼 추가
+- username UNIQUE 제약 추가
+- handle_new_user 트리거 업데이트 (email 포함)
+- RLS 정책 강화 (deleted_at IS NULL 조건 추가)
 
 ---
 

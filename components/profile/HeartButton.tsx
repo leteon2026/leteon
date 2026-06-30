@@ -47,12 +47,12 @@ export default function HeartButton({ toUserId, initialCount, currentUserId }: H
     <button
       onClick={handleToggle}
       disabled={loading || isOwnProfile}
-      className={`flex items-center gap-2 px-4 py-2 rounded-full border font-semibold text-sm transition-colors duration-200 ${
+      className={`flex items-center gap-2 px-4 py-2 rounded border font-semibold text-sm transition-all duration-200 backdrop-blur-sm ${
         isOwnProfile
-          ? 'border-zinc-700 text-zinc-600 cursor-default'
+          ? 'border-white/10 text-zinc-600 cursor-default bg-white/[0.03]'
           : hearted
-          ? 'bg-red-500/10 border-red-500/40 text-red-400 hover:bg-red-500/20'
-          : 'border-zinc-700 text-zinc-400 hover:border-red-400/60 hover:text-red-400'
+          ? 'bg-red-500/15 border-red-500/40 text-red-400 hover:bg-red-500/25'
+          : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:border-red-400/50 hover:text-red-400 hover:bg-red-500/10'
       } disabled:opacity-50`}
     >
       <svg

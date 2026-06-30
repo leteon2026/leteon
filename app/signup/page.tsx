@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ADMIN_EMAIL } from '@/lib/admin'
 
 function EyeIcon({ open }: { open: boolean }) {
   if (open) {
@@ -22,6 +21,17 @@ function EyeIcon({ open }: { open: boolean }) {
   )
 }
 
+const PHONE_RE = /^01[016789][-\s]?\d{3,4}[-\s]?\d{4}$/
+
+interface FieldErrors {
+  username?: string
+  email?: string
+  password?: string
+  confirmPassword?: string
+  phone?: string
+  terms?: string
+}
+
 export default function SignupPage() {
   const router = useRouter()
   const [form, setForm] = useState({
@@ -31,146 +41,192 @@ export default function SignupPage() {
     confirmPassword: '',
     phone: '',
   })
+  const [terms, setTerms] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [sent, setSent] = useState(false)
+  const [globalError, setGlobalError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
-  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm(prev => ({ ...prev, [key]: e.target.value }))
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setForm(prev => ({ ...prev, [key]: value }))
+    // 타이핑 시작하면 해당 필드 에러 지우기
+    if (fieldErrors[key]) {
+      setFieldErrors(prev => ({ ...prev, [key]: undefined }))
+    }
+  }
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const markTouched = (key: string) => () =>
+    setTouched(prev => ({ ...prev, [key]: true }))
+
+  function validateField(key: keyof typeof form, value: string): string | undefined {
+    switch (key) {
+      case 'username': {
+        const v = value.trim()
+        if (!v) return '닉네임을 입력해주세요.'
+        if (v.length < 2) return '닉네임은 2자 이상이어야 합니다.'
+        if (v.length > 20) return '닉네임은 20자 이하여야 합니다.'
+        return undefined
+      }
+      case 'email':
+        if (!value.trim()) return '이메일을 입력해주세요.'
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return '올바른 이메일 형식이 아닙니다.'
+        return undefined
+      case 'password':
+        if (!value) return '비밀번호를 입력해주세요.'
+        if (value.length < 6) return '비밀번호는 6자 이상이어야 합니다.'
+        return undefined
+      case 'confirmPassword':
+        if (!value) return '비밀번호를 한 번 더 입력해주세요.'
+        if (value !== form.password) return '비밀번호가 일치하지 않습니다.'
+        return undefined
+      case 'phone': {
+        const v = value.trim()
+        if (!v) return '전화번호를 입력해주세요.'
+        if (!PHONE_RE.test(v.replace(/\s/g, ''))) return '올바른 형식이 아닙니다. (예: 010-1234-5678)'
+        return undefined
+      }
+    }
+  }
+
+  function validateAll(): FieldErrors {
+    const errors: FieldErrors = {}
+    for (const key of ['username', 'email', 'password', 'confirmPassword', 'phone'] as const) {
+      const err = validateField(key, form[key])
+      if (err) errors[key] = err
+    }
+    if (!terms) errors.terms = '이용약관에 동의해주세요.'
+    return errors
+  }
+
+  const handleBlur = (key: keyof typeof form) => () => {
+    setTouched(prev => ({ ...prev, [key]: true }))
+    const err = validateField(key, form[key])
+    setFieldErrors(prev => ({ ...prev, [key]: err }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
+    setGlobalError(null)
 
-    const username = form.username.trim()
-    if (!username) {
-      setError('닉네임을 입력해주세요.')
-      return
-    }
-    if (username.length < 2 || username.length > 20) {
-      setError('닉네임은 2~20자여야 합니다.')
-      return
-    }
-    if (form.password !== form.confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.')
-      return
-    }
-    if (form.password.length < 6) {
-      setError('비밀번호는 6자 이상이어야 합니다.')
-      return
-    }
-    if (form.email !== ADMIN_EMAIL && !form.phone.trim()) {
-      setError('전화번호를 입력해주세요.')
+    const errors = validateAll()
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setTouched({ username: true, email: true, password: true, confirmPassword: true, phone: true })
       return
     }
 
     setLoading(true)
-    const supabase = createClient()
-    const { data, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: { full_name: username, phone: form.phone },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+
+    // 서버에서 user 생성 (SUPABASE_SERVICE_ROLE_KEY는 이 route handler 안에서만 사용)
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email.trim(),
+        password: form.password,
+        username: form.username.trim(),
+        phone: form.phone.trim(),
+      }),
     })
 
-    if (authError) {
-      setError(authError.message)
+    const data = await res.json()
+
+    if (!res.ok) {
+      setGlobalError(data.error ?? '회원가입 중 오류가 발생했습니다.')
       setLoading(false)
       return
     }
 
-    if (data.session) {
-      router.replace('/')
+    // 가입 성공 → 즉시 로그인 (이메일 인증 없음)
+    const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: form.email.trim(),
+      password: form.password,
+    })
+
+    if (signInError) {
+      // 로그인 실패 (극히 드문 케이스) → 로그인 페이지로 안내
+      router.push('/login?message=가입이 완료되었습니다. 로그인해주세요.')
       return
     }
 
-    setSent(true)
-    setLoading(false)
+    router.push('/')
+    router.refresh()
   }
 
-  if (sent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
-        <div className="w-full max-w-sm text-center">
-          <div className="bg-zinc-900 border border-zinc-700 rounded p-8">
-            <div className="w-12 h-12 bg-lime-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-bold text-white mb-2">이메일을 확인하세요</h2>
-            <p className="text-zinc-400 text-sm mb-1">
-              <span className="text-lime-400 font-medium">{form.email}</span>로
-            </p>
-            <p className="text-zinc-400 text-sm mb-6">인증 링크를 보냈습니다. 링크를 클릭해 가입을 완료하세요.</p>
-            <Link href="/login" className="text-sm text-lime-400 hover:text-lime-300 font-medium">
-              로그인으로 돌아가기
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const inputClass = (key: keyof FieldErrors) =>
+    `w-full glass-input rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 transition-colors ${
+      touched[key] && fieldErrors[key] ? 'border-red-500/60' : ''
+    }`
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
+        {/* 로고 */}
         <div className="text-center mb-8">
-          <p className="text-3xl font-black text-lime-400 tracking-widest">LETEON</p>
-          <p className="mt-1 text-zinc-400 text-sm font-medium">레테온</p>
+          <Link href="/" className="inline-block">
+            <p className="text-3xl font-black text-lime-400 tracking-widest">LETEON</p>
+            <p className="mt-0.5 text-zinc-500 text-xs font-medium tracking-widest uppercase">Korea Bike Marketplace</p>
+          </Link>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-700 rounded p-7">
+        <div className="glass-card-strong rounded p-7 shadow-2xl shadow-black/50">
           <h1 className="text-base font-bold text-white mb-1 text-center">회원가입</h1>
-          <p className="text-zinc-400 text-sm text-center mb-6">계정을 만들어 시작하세요</p>
+          <p className="text-zinc-500 text-sm text-center mb-6">계정을 만들어 시작하세요</p>
 
-          {error && (
+          {globalError && (
             <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-400 text-center">
-              {error}
+              {globalError}
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {/* 닉네임 */}
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
                 닉네임 <span className="text-lime-400">*</span>
               </label>
               <input
                 type="text"
                 value={form.username}
                 onChange={set('username')}
-                required
+                onBlur={handleBlur('username')}
                 maxLength={20}
                 placeholder="2~20자"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className={inputClass('username')}
               />
-              <p className="mt-1 text-xs text-zinc-600 text-right">{form.username.length}/20</p>
+              {touched.username && fieldErrors.username ? (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.username}</p>
+              ) : (
+                <p className="mt-1 text-xs text-zinc-600 text-right">{form.username.length}/20</p>
+              )}
             </div>
 
             {/* 이메일 */}
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
                 이메일 <span className="text-lime-400">*</span>
               </label>
               <input
                 type="email"
                 value={form.email}
                 onChange={set('email')}
-                required
+                onBlur={handleBlur('email')}
                 autoComplete="email"
                 placeholder="example@email.com"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className={inputClass('email')}
               />
+              {touched.email && fieldErrors.email && (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.email}</p>
+              )}
             </div>
 
             {/* 비밀번호 */}
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
                 비밀번호 <span className="text-lime-400">*</span>
               </label>
               <div className="relative">
@@ -178,24 +234,28 @@ export default function SignupPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={set('password')}
-                  required
+                  onBlur={handleBlur('password')}
                   autoComplete="new-password"
                   placeholder="6자 이상"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                  className={`${inputClass('password')} pr-11`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  tabIndex={-1}
                 >
                   <EyeIcon open={showPassword} />
                 </button>
               </div>
+              {touched.password && fieldErrors.password && (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.password}</p>
+              )}
             </div>
 
             {/* 비밀번호 확인 */}
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
                 비밀번호 확인 <span className="text-lime-400">*</span>
               </label>
               <div className="relative">
@@ -203,53 +263,101 @@ export default function SignupPage() {
                   type={showConfirm ? 'text' : 'password'}
                   value={form.confirmPassword}
                   onChange={set('confirmPassword')}
-                  required
+                  onBlur={handleBlur('confirmPassword')}
                   autoComplete="new-password"
                   placeholder="비밀번호 재입력"
-                  className={`w-full bg-zinc-800 border rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400 ${
-                    form.confirmPassword && form.password !== form.confirmPassword
-                      ? 'border-red-500/60'
-                      : 'border-zinc-700'
-                  }`}
+                  className={`${inputClass('confirmPassword')} pr-11`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm(p => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  tabIndex={-1}
                 >
                   <EyeIcon open={showConfirm} />
                 </button>
               </div>
-              {form.confirmPassword && form.password !== form.confirmPassword && (
-                <p className="mt-1 text-xs text-red-400">비밀번호가 일치하지 않습니다.</p>
+              {touched.confirmPassword && fieldErrors.confirmPassword && (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.confirmPassword}</p>
               )}
             </div>
 
-            {/* 핸드폰 */}
+            {/* 전화번호 */}
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-                전화번호
-                {form.email === ADMIN_EMAIL
-                  ? <span className="ml-1 text-zinc-600 font-normal">(선택)</span>
-                  : <span className="text-lime-400 ml-0.5">*</span>
-                }
+              <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+                전화번호 <span className="text-lime-400">*</span>
               </label>
               <input
                 type="tel"
                 value={form.phone}
                 onChange={set('phone')}
+                onBlur={handleBlur('phone')}
+                onFocus={markTouched('phone')}
                 autoComplete="tel"
                 placeholder="010-0000-0000"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className={inputClass('phone')}
               />
+              {touched.phone && fieldErrors.phone ? (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.phone}</p>
+              ) : (
+                <p className="mt-1 text-xs text-zinc-600">현재는 전화번호 인증 없이 가입됩니다.</p>
+              )}
+            </div>
+
+            {/* 이용약관 */}
+            <div className="pt-1">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative mt-0.5 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={terms}
+                    onChange={e => {
+                      setTerms(e.target.checked)
+                      if (fieldErrors.terms) setFieldErrors(prev => ({ ...prev, terms: undefined }))
+                    }}
+                    className="sr-only"
+                  />
+                  <div className={`w-4 h-4 rounded border transition-colors ${
+                    terms
+                      ? 'bg-lime-400 border-lime-400'
+                      : 'border-white/20 bg-white/5 group-hover:border-white/40'
+                  }`}>
+                    {terms && (
+                      <svg className="w-4 h-4 text-zinc-950 p-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-xs text-zinc-400 leading-relaxed">
+                  레테온의{' '}
+                  <span className="text-lime-400 underline underline-offset-2">이용약관</span>
+                  {' '}및{' '}
+                  <span className="text-lime-400 underline underline-offset-2">개인정보처리방침</span>
+                  에 동의합니다.
+                </span>
+              </label>
+              {fieldErrors.terms && (
+                <p className="mt-1 text-xs text-red-400 pl-7">{fieldErrors.terms}</p>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded transition-colors text-sm mt-2"
+              className="w-full bg-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded transition-colors text-sm mt-2"
             >
-              {loading ? '처리 중...' : '회원가입'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  처리 중...
+                </span>
+              ) : (
+                '회원가입'
+              )}
             </button>
           </form>
 

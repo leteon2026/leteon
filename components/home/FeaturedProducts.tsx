@@ -33,10 +33,10 @@ export default async function FeaturedListings() {
     <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto">
       <div className="flex items-end justify-between mb-12">
         <div>
+          <p className="text-xs font-bold text-zinc-500 tracking-[0.2em] uppercase mb-2">Latest</p>
           <h2 className="text-3xl sm:text-4xl font-black text-white">최근 매물</h2>
-          <p className="mt-3 text-zinc-500">방금 등록된 바이크들</p>
         </div>
-        <Link href="/listings" className="text-sm text-lime-400 hover:text-lime-300 font-medium hidden sm:block">
+        <Link href="/listings" className="text-sm text-lime-400 hover:text-lime-300 font-medium hidden sm:block tracking-wide">
           전체보기 →
         </Link>
       </div>

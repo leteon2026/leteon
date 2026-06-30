@@ -14,10 +14,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
   return (
     <Link
       href={`/listings/${listing.slug}`}
-      className="group block bg-zinc-900 border border-zinc-700 rounded overflow-hidden hover:border-zinc-500 transition-colors duration-200"
+      className="group block glass-card rounded overflow-hidden hover:border-lime-400/30 hover:shadow-lg hover:shadow-lime-400/5 transition-all duration-300"
     >
       {/* Image */}
-      <div className="relative aspect-square bg-zinc-800 overflow-hidden">
+      <div className="relative aspect-square bg-zinc-900 overflow-hidden">
         {firstImage ? (
           <Image
             src={firstImage}
