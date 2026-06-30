@@ -34,7 +34,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
         </div>
         <Link
           href="/listings/new"
-          className="bg-lime-400 text-black text-sm font-bold px-4 py-2.5 rounded-2xl hover:bg-lime-300 transition-colors"
+          className="bg-lime-400 text-black text-sm font-bold px-4 py-2.5 rounded hover:bg-lime-300 transition-colors"
         >
           + 매물 등록
         </Link>

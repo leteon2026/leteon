@@ -21,7 +21,7 @@ export default function CategorySection() {
           <Link
             key={cat.name}
             href={`/listings?category=${cat.name}`}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-lime-400/50 hover:bg-zinc-800 transition-colors duration-200"
+            className="bg-zinc-900 border border-zinc-700 rounded p-5 hover:border-lime-400 hover:bg-zinc-800 transition-colors duration-200"
           >
             <div className="text-sm font-bold text-white">{cat.name}</div>
             <div className="mt-1 text-xs text-zinc-500 leading-relaxed">{cat.desc}</div>

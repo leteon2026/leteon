@@ -36,7 +36,7 @@ export default function CategoryFilter({ basePath = '/products' }: CategoryFilte
         <button
           key={cat.value}
           onClick={() => handleSelect(cat.value)}
-          className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 ${
+          className={`px-4 py-2 rounded text-sm font-semibold border transition-all duration-200 ${
             current === cat.value
               ? 'bg-lime-400 text-black border-lime-400'
               : 'bg-transparent text-zinc-400 border-zinc-700 hover:border-lime-400 hover:text-lime-400'

@@ -14,7 +14,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
   return (
     <Link
       href={`/listings/${listing.slug}`}
-      className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors duration-200"
+      className="group block bg-zinc-900 border border-zinc-700 rounded overflow-hidden hover:border-zinc-500 transition-colors duration-200"
     >
       {/* Image */}
       <div className="relative aspect-square bg-zinc-800 overflow-hidden">
@@ -68,7 +68,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </p>
         )}
 
-        <p className="mt-2 text-base font-black text-lime-400">{formatPrice(listing.price)}</p>
+        <p className="mt-2 text-base font-black font-mono text-lime-400">{formatPrice(listing.price)}</p>
       </div>
     </Link>
   )

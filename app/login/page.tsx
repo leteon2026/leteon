@@ -64,12 +64,12 @@ export default function LoginPage() {
           <p className="mt-1 text-zinc-400 text-sm font-medium">레테온</p>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-7">
+        <div className="bg-zinc-900 border border-zinc-700 rounded p-7">
           <h1 className="text-base font-bold text-white mb-1 text-center">로그인</h1>
           <p className="text-zinc-400 text-sm text-center mb-6">이메일과 비밀번호를 입력하세요</p>
 
           {error && (
-            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded-2xl text-sm text-red-400 text-center">
+            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-400 text-center">
               {error}
             </div>
           )}
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 placeholder="example@email.com"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
               />
             </div>
 
@@ -98,7 +98,7 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
                 />
                 <button
                   type="button"
@@ -113,7 +113,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded-2xl transition-colors text-sm mt-2"
+              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded transition-colors text-sm mt-2"
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>

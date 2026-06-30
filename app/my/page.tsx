@@ -43,7 +43,7 @@ export default async function MyPage() {
       <h1 className="text-3xl font-black text-white mb-8">내 계정</h1>
 
       {/* Profile Section */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 mb-8">
+      <div className="bg-zinc-900 border border-zinc-700 rounded p-6 mb-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative w-16 h-16 rounded-full bg-zinc-800 overflow-hidden border border-zinc-700 flex-shrink-0">
             {profile?.avatar_url ? (
@@ -81,7 +81,7 @@ export default async function MyPage() {
         ) : (
           <div className="space-y-3">
             {(listings as Listing[]).map(listing => (
-              <div key={listing.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center gap-4">
+              <div key={listing.id} className="bg-zinc-900 border border-zinc-700 rounded p-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-sm font-semibold ${statusColor[listing.status]}`}>
@@ -93,7 +93,7 @@ export default async function MyPage() {
                   <Link href={`/listings/${listing.slug}`} className="text-base font-semibold text-white hover:text-lime-400 transition-colors line-clamp-1">
                     {listing.title}
                   </Link>
-                  <p className="text-sm font-black text-lime-400 mt-0.5">{formatPrice(listing.price)}</p>
+                  <p className="text-sm font-black font-mono text-lime-400 mt-0.5">{formatPrice(listing.price)}</p>
                   {listing.can_delete_after && (
                     <p className="text-sm text-zinc-500 mt-1">
                       삭제 가능: {new Date(listing.can_delete_after).toLocaleDateString('ko-KR')}

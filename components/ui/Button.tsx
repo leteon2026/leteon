@@ -13,7 +13,7 @@ export default function Button({
   children,
   ...props
 }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl'
+  const base = 'inline-flex items-center justify-center font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded'
 
   const variants = {
     primary: 'bg-lime-400 text-black hover:bg-lime-300 active:bg-lime-500',

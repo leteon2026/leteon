@@ -83,7 +83,7 @@ export default function Header() {
             {user ? (
               <>
                 <Link href="/listings/new"
-                  className="bg-lime-400 text-black text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-lime-300 transition-colors whitespace-nowrap">
+                  className="bg-lime-400 text-black text-xs font-bold px-3.5 py-2 rounded hover:bg-lime-300 transition-colors whitespace-nowrap">
                   + 매물 등록
                 </Link>
                 <Link href="/my" className="flex items-center gap-2 group">
@@ -148,7 +148,7 @@ export default function Header() {
               <span className="text-base font-black text-lime-400 tracking-widest">LETEON</span>
               <button
                 onClick={closeDrawer}
-                className="w-9 h-9 flex items-center justify-center text-zinc-500 hover:text-white rounded-xl transition-colors"
+                className="w-9 h-9 flex items-center justify-center text-zinc-500 hover:text-white rounded transition-colors"
                 aria-label="닫기"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -185,7 +185,7 @@ export default function Header() {
               <p className="px-3 pb-2 text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">카테고리</p>
               {categories.map(c => (
                 <Link key={c.href} href={c.href} onClick={closeDrawer}
-                  className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded-xl transition-colors">
+                  className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded transition-colors">
                   {c.label}
                 </Link>
               ))}
@@ -193,7 +193,7 @@ export default function Header() {
               {/* 전체 매물 */}
               <div className="mt-4 pt-4 border-t border-zinc-800/60">
                 <Link href="/listings" onClick={closeDrawer}
-                  className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded-xl transition-colors">
+                  className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded transition-colors">
                   전체 매물
                 </Link>
               </div>
@@ -202,7 +202,7 @@ export default function Header() {
               {user && (
                 <div className="mt-4 pt-4 border-t border-zinc-800/60">
                   <Link href="/my" onClick={closeDrawer}
-                    className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded-xl transition-colors">
+                    className="block px-3 py-3 text-sm font-medium text-zinc-300 hover:text-lime-400 hover:bg-zinc-900 rounded transition-colors">
                     내 매물 / 프로필
                   </Link>
                 </div>
@@ -214,20 +214,20 @@ export default function Header() {
               {user ? (
                 <>
                   <Link href="/listings/new" onClick={closeDrawer}
-                    className="flex items-center justify-center gap-2 w-full bg-lime-400 text-black text-sm font-bold py-3 rounded-xl hover:bg-lime-300 transition-colors">
+                    className="flex items-center justify-center gap-2 w-full bg-lime-400 text-black text-sm font-bold py-3 rounded hover:bg-lime-300 transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                     매물 등록
                   </Link>
                   <button onClick={handleLogout}
-                    className="w-full text-center text-sm text-zinc-600 hover:text-red-400 py-2.5 rounded-xl transition-colors">
+                    className="w-full text-center text-sm text-zinc-600 hover:text-red-400 py-2.5 rounded transition-colors">
                     로그아웃
                   </button>
                 </>
               ) : (
                 <Link href="/login" onClick={closeDrawer}
-                  className="block w-full text-center bg-lime-400 text-black text-sm font-bold py-3 rounded-xl hover:bg-lime-300 transition-colors">
+                  className="block w-full text-center bg-lime-400 text-black text-sm font-bold py-3 rounded hover:bg-lime-300 transition-colors">
                   로그인
                 </Link>
               )}

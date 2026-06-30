@@ -3,7 +3,7 @@ import Button from '@/components/ui/Button'
 
 export default function HeroSection() {
   return (
-    <section className="flex items-center justify-center bg-zinc-950 border-b border-zinc-900">
+    <section className="flex items-center justify-center bg-zinc-950 border-b border-zinc-800">
       <div className="text-center px-4 max-w-3xl mx-auto py-24 sm:py-32">
         <h1 className="text-6xl sm:text-7xl md:text-8xl font-black text-white leading-none tracking-tight">
           LETEON

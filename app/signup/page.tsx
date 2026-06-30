@@ -96,7 +96,7 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
         <div className="w-full max-w-sm text-center">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+          <div className="bg-zinc-900 border border-zinc-700 rounded p-8">
             <div className="w-12 h-12 bg-lime-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-6 h-6 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -124,12 +124,12 @@ export default function SignupPage() {
           <p className="mt-1 text-zinc-400 text-sm font-medium">레테온</p>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-7">
+        <div className="bg-zinc-900 border border-zinc-700 rounded p-7">
           <h1 className="text-base font-bold text-white mb-1 text-center">회원가입</h1>
           <p className="text-zinc-400 text-sm text-center mb-6">계정을 만들어 시작하세요</p>
 
           {error && (
-            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded-2xl text-sm text-red-400 text-center">
+            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-400 text-center">
               {error}
             </div>
           )}
@@ -147,7 +147,7 @@ export default function SignupPage() {
                 required
                 maxLength={20}
                 placeholder="2~20자"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
               />
               <p className="mt-1 text-xs text-zinc-600 text-right">{form.username.length}/20</p>
             </div>
@@ -164,7 +164,7 @@ export default function SignupPage() {
                 required
                 autoComplete="email"
                 placeholder="example@email.com"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
               />
             </div>
 
@@ -181,7 +181,7 @@ export default function SignupPage() {
                   required
                   autoComplete="new-password"
                   placeholder="6자 이상"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
                 />
                 <button
                   type="button"
@@ -206,7 +206,7 @@ export default function SignupPage() {
                   required
                   autoComplete="new-password"
                   placeholder="비밀번호 재입력"
-                  className={`w-full bg-zinc-800 border rounded-2xl px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400 ${
+                  className={`w-full bg-zinc-800 border rounded px-4 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400 ${
                     form.confirmPassword && form.password !== form.confirmPassword
                       ? 'border-red-500/60'
                       : 'border-zinc-700'
@@ -240,14 +240,14 @@ export default function SignupPage() {
                 onChange={set('phone')}
                 autoComplete="tel"
                 placeholder="010-0000-0000"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded-2xl transition-colors text-sm mt-2"
+              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold py-3 px-4 rounded transition-colors text-sm mt-2"
             >
               {loading ? '처리 중...' : '회원가입'}
             </button>
